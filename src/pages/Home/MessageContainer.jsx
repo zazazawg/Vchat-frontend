@@ -1,8 +1,11 @@
-// MessageContainer.jsx
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { IoMdSend } from "react-icons/io";
 import { useSelector } from "react-redux";
 import useGetMessages from "../../hooks/useGetMessages";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setMessages } from "../../redux/messageSlice";
 
 const formatTime = (iso) => {
   const d = iso ? new Date(iso) : new Date();
@@ -13,22 +16,18 @@ const formatTime = (iso) => {
   });
 };
 
-// Safely extract an id from many possible shapes
 const normalizeId = (val) => {
   if (!val) return undefined;
   if (typeof val === "string" || typeof val === "number")
     return String(val).trim();
-  // object case: message.senderId could be an object { _id, id }
   return String(val._id ?? val.id ?? "").trim();
 };
 
 const MessageContainer = () => {
   useGetMessages();
-
   const messages = useSelector((s) => s.message?.messages) ?? [];
   const authUser = useSelector((s) => s.user?.authUser);
   const selectedUser = useSelector((s) => s.user.selectedUser);
-  console.log("selectedUser", selectedUser);
 
   const currentUserId = useMemo(() => {
     return normalizeId(
@@ -38,19 +37,43 @@ const MessageContainer = () => {
         authUser?.user?.id
     );
   }, [authUser]);
-  console.log("authUser", authUser);
-  const [input, setInput] = useState("");
-  const listRef = useRef(null);
 
+  const [input, setInput] = useState("");
+  const listRef = useRef(null);  // Ref for messages container
+  const lastMessageRef = useRef(null); // Ref for the last message
+
+  // Scroll to the last message whenever the messages change
   useEffect(() => {
-    if (listRef.current)
-      listRef.current.scrollTop = listRef.current.scrollHeight;
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
-  const send = () => {
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const text = input.trim();
     if (!text) return;
     setInput("");
+
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/message/sendMessage/${selectedUser._id}`,
+        { message: text },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (res.data.message) {
+        toast.success(res.data.message);
+        dispatch(setMessages([...messages, res.data.newMessage]));
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message);
+      console.log(err);
+    }
   };
 
   return (
@@ -66,7 +89,7 @@ const MessageContainer = () => {
             />
             <div>
               <p className="font-semibold">{selectedUser.fullname}</p>
-              <p className="font-semibold text-gray-400 text-sm">
+              <p className="font-semibold text-gray-300 text-sm">
                 {selectedUser.username}
               </p>
             </div>
@@ -83,15 +106,12 @@ const MessageContainer = () => {
           <p className="text-sm text-gray-500">No messages yet.</p>
         ) : (
           messages.map((msg) => {
-            // msg: { _id, message, senderId, receiverId, createdAt, ... }
+
             const senderIdNorm = normalizeId(msg.senderId);
             const mine =
               currentUserId && senderIdNorm
                 ? senderIdNorm === currentUserId
                 : false;
-
-            // Debug once if needed
-            // console.log({ senderIdNorm, currentUserId, mine, msg });
 
             return (
               <div
@@ -120,29 +140,29 @@ const MessageContainer = () => {
             );
           })
         )}
+
+        {/* Ref for last message */}
+        <div ref={lastMessageRef} />
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t flex gap-2 items-center flex-shrink-0">
+      <form
+        onSubmit={handleSubmit}
+        className="p-4 border-t flex gap-2 items-center flex-shrink-0"
+      >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send();
-            }
-          }}
           placeholder="Type a message..."
           className="flex-1 p-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
         />
         <button
-          onClick={send}
+          type="submit"
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 active:scale-[0.99]"
         >
           <IoMdSend />
         </button>
-      </div>
+      </form>
     </div>
   );
 };
