@@ -1,26 +1,32 @@
 import React from "react";
 import Sidebar from "./sidebar";
 import MessageContainer from "./messageContainer";
-import { Link } from "react-router"; // Changed to 'react-router-dom' as 'react-router' is deprecated
+import { Link } from "react-router"
 
 const Home = () => {
   return (
     <div
-      className="relative h-screen bg-cover bg-center"
-      style={{ backgroundImage: 'url("/src/assets/tomato.jpg")' }}
+      className="relative h-screen bg-cover bg-no-repeat bg-center"
+      style={{ backgroundImage: 'url("/src/assets/tomato.jpg") ', backgroundSize: 'cover ' }}
     >
       <div className="absolute inset-0 bg-black/40">
         <header className="text-white p-4 flex justify-between items-center">
           <h1 className="text-3xl font-bold">
-            <Link className="text-amber-100 hover:text-white transition duration-300" to="/">
+            <Link
+              className="text-amber-100 hover:text-white transition duration-300"
+              to="/"
+            >
               Vchat
             </Link>
           </h1>
           <nav className="space-x-4">
-            <Link to="/" className="hover:text-amber-100 transition duration-300">
+            <Link to="/" className="hover:underline transition duration-300">
               Home
             </Link>
-            <Link to="/login" className="hover:text-amber-100 transition duration-300">
+            <Link
+              to="/login"
+              className="  hover:underline transition duration-300"
+            >
               Login
             </Link>
           </nav>
@@ -35,10 +41,13 @@ const Home = () => {
           </h6>
         </main>
 
-        <section className="flex sm:flex-row sm:h-[600px] h- bg-white/30 backdrop-blur-xs rounded-2xl gap-4 p-8 container mt-2 mx-auto overflow-hidden">
+        {/* Reduce height of chat section by adjusting the 'h-[600px]' */}
+        <section className="flex sm:flex-row flex-col bg-white/30 backdrop-blur-xs rounded-2xl gap-4 p-8 w-3xl mt-2 mx-auto overflow-hidden h-[650px]"> 
           <Sidebar />
           <span className="divider divider-horizontal"></span>
-          <MessageContainer />
+          <div className="flex-1 h-full"> {/* Make sure this takes the remaining space */}
+            <MessageContainer />
+          </div>
         </section>
       </div>
     </div>
