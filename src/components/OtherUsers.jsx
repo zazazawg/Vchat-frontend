@@ -17,7 +17,8 @@ const OtherUsers = () => {
     dispatch(setSelectedUser(user));
   };
 
-  if (!otherUsers) return null; // If no users, return nothing
+  // Ensure otherUsers is an array before rendering
+  if (!Array.isArray(otherUsers) || otherUsers.length === 0) return null; // If no users, return nothing
 
   return (
     <div className="space-y-2">
@@ -30,7 +31,7 @@ const OtherUsers = () => {
             onClick={() => selectedUserHandler(user)}
             key={index}
             className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all duration-300 ${
-              selectedUser?.username === user.username
+              selectedUser?.username === user?.username
                 ? "bg-white/40 backdrop-blur-md"
                 : "hover:bg-white/10 hover:backdrop-blur-md"
             }`}
@@ -39,15 +40,15 @@ const OtherUsers = () => {
               {/* Avatar */}
               <div className="flex-shrink-0">
                 <img
-                  src={user.profilePhoto}
-                  alt={user.username}
+                  src={user?.profilePhoto}
+                  alt={user?.username}
                   className="w-14 h-14 rounded-full object-cover"
                 />
               </div>
               {/* Name and username */}
               <div>
-                <p className="font-medium">{user.fullname}</p>
-                <p className="text-sm text-gray-500">@{user.username}</p>
+                <p className="font-medium">{user?.fullname}</p>
+                <p className="text-sm text-gray-500">@{user?.username}</p>
               </div>
             </div>
           </div>
