@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { IoMdSend } from "react-icons/io";
 import { useSelector } from "react-redux";
-import useGetMessages from "../../hooks/useGetMessages";
+import useGetMessages from "../../hooks/useGetMessages"; // For initial messages
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setMessages } from "../../redux/messageSlice";
 import { setSelectedUser } from "../../redux/userSlice";
+import useGetRealTimeMessage from "../../hooks/useGetRealTimeMessage"; // For real-time updates
 
 const formatTime = (iso) => {
   const d = iso ? new Date(iso) : new Date();
@@ -25,7 +26,10 @@ const normalizeId = (val) => {
 };
 
 const MessageContainer = () => {
+  // Fetch initial messages and listen to real-time updates
   useGetMessages();
+  useGetRealTimeMessage();
+
   const messages = useSelector((s) => s.message?.messages) ?? [];
   const authUser = useSelector((s) => s.user?.authUser);
   const selectedUser = useSelector((s) => s.user.selectedUser);
@@ -40,7 +44,6 @@ const MessageContainer = () => {
   const listRef = useRef(null); 
   const lastMessageRef = useRef(null); 
 
-  
   useEffect(() => {
     if (lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -66,7 +69,7 @@ const MessageContainer = () => {
       );
       if (res.data.message) {
         toast.success(res.data.message);
-        dispatch(setMessages([...messages, res.data.newMessage]));
+        dispatch(setMessages([...messages, res.data.newMessage])); // Append the new message to Redux store
       }
     } catch (err) {
       toast.error(err.response?.data?.message || err.message);
@@ -127,19 +130,9 @@ const MessageContainer = () => {
                     />
                   )}
                   {/* Message bubble */}
-                  <div
-                    className={`max-w-xs p-3 rounded-lg shadow ${
-                      mine
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200 text-gray-800"
-                    }`}
-                  >
+                  <div className={`max-w-xs p-3 rounded-lg shadow ${mine ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"}`}>
                     <p className="whitespace-pre-wrap break-words">{msg.message}</p>
-                    <span
-                      className={`mt-1 block text-[10px] opacity-80 ${
-                        mine ? "text-blue-100" : "text-gray-600"
-                      }`}
-                    >
+                    <span className={`mt-1 block text-[10px] opacity-80 ${mine ? "text-blue-100" : "text-gray-600"}`}>
                       {formatTime(msg.createdAt)}
                     </span>
                   </div>

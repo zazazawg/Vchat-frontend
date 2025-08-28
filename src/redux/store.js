@@ -1,11 +1,18 @@
-import {configureStore} from '@reduxjs/toolkit';
-import userReducer from './userSlice.js';
-import messageReducer from './messageSlice.js';
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./userSlice.js";
+import messageReducer from "./messageSlice.js";
+import socketReducer from "./socketSlice.js";
+
 const store = configureStore({
-    reducer:{
-        user : userReducer ,
-        message : messageReducer
-    }
+  reducer: {
+    user: userReducer,
+    message: messageReducer,
+    socket: socketReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, // Needed for storing socket object
+    }),
 });
 
-export default store
+export default store;

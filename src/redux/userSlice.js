@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const userSlice = createSlice({
   name: "user",
-  initialState: { authUser: null, otherUsers: [],selectedUser: null },
+  initialState: { authUser: null, otherUsers: [],selectedUser: null,onlineUsers:[] },
   reducers: {
     setAuthUser: (state, action) => {
       state.authUser = action.payload;
@@ -13,8 +13,12 @@ const userSlice = createSlice({
     setSelectedUser: (state, action) => {
       state.selectedUser = action.payload;
     },
+    setOnlineUsers: (state, action) => {
+      state.onlineUsers = action.payload;
+    },
   },
 });
 
-export const { setAuthUser, setOtherUsers, setSelectedUser } = userSlice.actions;
+export const { setAuthUser, setOtherUsers, setSelectedUser, setOnlineUsers } = userSlice.actions;
 export default userSlice.reducer;
+ 
